@@ -1,76 +1,75 @@
 #------------------------------------------#
 # Title: CDInventory.py
-# Desc: Script CDINventory to store CD Inventory data
+# Desc: Starter Script for Assignment 05
 # Change Log: (Who, When, What)
-# Rain Doggerel, 2022 Nov 06, Finishing
-# Rain Doggerel, 2022 Nov 02, Scaffolding
+# Rain Doggerel, 2022-Nov-13, adapted in my work from Assignment04 re: loading
+# Rain Doggerel, 2022-Nov-12, change to dicts + deletion section
 # DBiesinger, 2030-Jan-01, Created File
 #------------------------------------------#
-import sys
-if len(sys.argv) > 1:
-    filename = sys.argv[1] # Allow a filename to be passed for funsies
-else:
-    filename = 'CDInventory.txt'
-    
-# This is 'if file doesn't exist then create it'
-with open(filename,'a') as existenceTouch:
-    existenceTouch.write('')
 
-# Initialize some things mostly to just stave off warnings
-newCDtitle = 'Untitled'
-newCDartist = 'Unknown Artist'
-menuChoice = '5'
+# Declariables
+strChoice = '' # User input
+delChoice = '' # Deletion choice
+lstTbl = []  # list of dicts to hold data
+dictRow = {"ID":"","Title":"","Artist":""}  # dict of data row
+strFileName = 'CDInventory.txt'  # data storage file
+objFile = None  # file object
 
-# To justify having save happen under a separate interaction
-# we try to keep the inventory in memory this way
-cdInventory = []
-with open(filename,'r') as inventoryRead: 
-    for line in inventoryRead.readlines():
-        cdInventory.append(line.rstrip().split(','))
-print(type(cdInventory))
-print(cdInventory)
-print('Length ' + str(len(cdInventory)))
+print('The CD Inventory\n')
 
-while True: #It's a nicer program as a loop
-# 1. Display menu allowing the user to choose: 'Add CD', 'Display Current Inventory', 'Save Inventory to file' and 'exit'
-    # Considering clearing the screen here but apparently I'd have 
-    # to do some OS specific things so maybe I won't
-    print('Let\'s inventory your CDs. Make a choice:')
-    print('1. Add CD 2. Display Current Inventory 3. Save 4. Exit')
-    menuChoice = input()
-    print() # Separating next display from input for increased clarity
+while True:
+    # 1. Display menu allowing the user to choose:
+    print('[l] load Inventory from file\n[a] Add CD\n[i] Display Current Inventory')
+    print('[d] delete CD from Inventory\n[s] Save Inventory to file\n[x] exit')
+    strChoice = input('l, a, i, d, s or x: ').lower()  # convert choice to lower case at time of input
+    print()
 
-# 2. Add data to the table (2d-list) each time the user wants to add data
-    if menuChoice == '1':
-        newCDtitle = input('Hey what\'s the album titled? ')
-        newCDartist = input('And what cool band did this album? ')
-        cdIndex = str(len(cdInventory) + 1) # Very important cast for fixing type errors
-        cdInventory.append([cdIndex,newCDtitle,newCDartist])
-        print(cdInventory[int(cdIndex) - 1]) # And uncast lol
-
-# 3. Display the current data to the user each time the user wants to display the data
-    elif menuChoice == '2':
-        i = 0
-        while i < len(cdInventory):
-            print(str(cdInventory[i][0]) + '\tAlbum: ' + cdInventory[i][1] + '\tArtist: ' + cdInventory[i][2])
-            i = int(i) + 1 # Why this has to be type cast here I can't fathom
-
-# 4. Save the data to a text file CDInventory.txt if the user chooses so
-    elif menuChoice == '3':
-        # Considered append but if I'm writing trash data it's not much
-        # worse to be appending it than overwriting
-        with open(filename,'w') as inventoryWrite:
-            gonnaWrite = '' # Cleaning for future saves
-            i = 0
-            while i < len(cdInventory):
-                gonnaWrite += ','.join(cdInventory[i])
-                gonnaWrite += '\n'
-                i = i + 1
-            inventoryWrite.write(gonnaWrite)
-
-# 5. Exit the program if the user chooses so.
-    elif menuChoice == '4':
+    if strChoice == 'x':
+        # 5. Exit the program if the user chooses so
         break
+
+    if strChoice == 'l':
+        lstTbl = [] # Probably would be ideal to let the user know this overwrites existing work
+        with open(strFileName,'r') as inventoryRead: 
+            for line in inventoryRead.readlines():
+                tempLoadList = line.rstrip().split(',') #To keep the append arguments clea(r/n)er
+                lstTbl.append({"ID":int(tempLoadList[0]),"Title":tempLoadList[1],"Artist":tempLoadList[2]})
+
+    elif strChoice == 'a':
+        # 2. Add data to the table (list of dicts) each time the user wants to add data
+        strID = input('Enter an ID: ')
+        # Might should try to catch failures of int inputs here
+        strTitle = input('Enter the CD\'s Title: ')
+        strArtist = input('Enter the Artist\'s Name: ')
+        intID = int(strID)
+        dictRow = {"ID":intID, "Title":strTitle, "Artist":strArtist}
+        lstTbl.append(dictRow)
+
+    elif strChoice == 'i':
+        # 3. Display the current data to the user each time the user wants to display the data
+        print('ID \tCD Title \tArtist')
+        for row in lstTbl:
+            print(str(row['ID']) + " \t" + row['Title'] + " \t" + row['Artist'])
+
+    elif strChoice == 'd':
+        print('Delete which ID entry?')
+        delChoice = input()
+        for row in lstTbl:
+            if row['ID'] == int(delChoice):
+                lstTbl.remove(row)
+                print('Found it and removed it')
+                break
+        else: # Hmm a bit surprised this seems to work like I hoped...
+            print('No such ID found')
+            
+    elif strChoice == 's':
+        # 4. Save the data to a text file CDInventory.txt if the user chooses so
+        objFile = open(strFileName, 'w') # Must become write or saves and loads become cancerous
+        strRow = '' # Clear for potential repeated saves
+        for row in lstTbl: # I think I don't prefer this way, but I didn't want to change it too too much
+            strRow += str(row['ID']) + ',' + row['Title'] + ',' + row['Artist'] + '\n'
+        objFile.write(strRow)
+        objFile.close()
+    
     else:
-        print('Hm that choice wasn\'t valid, let try again')
-        continue
+        print('Please choose either l, a, i, d, s or x!')
