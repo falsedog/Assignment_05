@@ -29,6 +29,7 @@ while True:
         break
 
     if strChoice == 'l':
+        # Load in file
         lstTbl = [] # Probably would be ideal to let the user know this overwrites existing work
         with open(strFileName,'r') as inventoryRead: 
             for line in inventoryRead.readlines():
@@ -52,6 +53,7 @@ while True:
             print(str(row['ID']) + " \t" + row['Title'] + " \t" + row['Artist'])
 
     elif strChoice == 'd':
+        # Delete an entry by ID
         print('Delete which ID entry?')
         delChoice = input()
         for row in lstTbl:
@@ -59,12 +61,12 @@ while True:
                 lstTbl.remove(row)
                 print('Found it and removed it')
                 break
-        else: # Hmm a bit surprised this seems to work like I hoped...
+        else: # Hmm a bit suspicious this seems to work like I hoped...
             print('No such ID found')
             
     elif strChoice == 's':
         # 4. Save the data to a text file CDInventory.txt if the user chooses so
-        objFile = open(strFileName, 'w') # Must become write or saves and loads become cancerous
+        objFile = open(strFileName, 'w') # Must become write or saves and loads become cancerous without additional logic
         strRow = '' # Clear for potential repeated saves
         for row in lstTbl: # I think I don't prefer this way, but I didn't want to change it too too much
             strRow += str(row['ID']) + ',' + row['Title'] + ',' + row['Artist'] + '\n'
